@@ -43,10 +43,11 @@ tasks:
     env:
       ENVIRONMENT: local
       HEADLESS: false
+      ENABLE_TOOLBAR: "false"
     cmds:
       - task: :up
+      - defer: {task: enable-toolbar}
       - task: clear-results
-      - task: disable-toolbar
       - cmd: uv run robot --include '{{.tag | default "single"}}' {{.ROBOT_PARAMS}}
 
   local:run:api:
@@ -55,10 +56,11 @@ tasks:
     env:
       ENVIRONMENT: local
       HEADLESS: true
+      ENABLE_TOOLBAR: "false"
     cmds:
       - task: :up
+      - defer: {task: enable-toolbar}
       - task: clear-results
-      - task: disable-toolbar
       - cmd: uv run pabot --processes 8 --artifactsinsubfolders --include api {{.ROBOT_PARAMS}}
 
   local:run:mobile:
@@ -96,10 +98,12 @@ tasks:
   docker:run:
     aliases: [run-docker]
     desc: Run Robot Framework tests in headless mode inside a docker container
+    env:
+      ENABLE_TOOLBAR: "false"
     cmds:
       - task: :up
+      - defer: {task: enable-toolbar}
       - task: clear-results
-      - task: disable-toolbar
       - task: :dc
         vars:
           SUB_CMD: >
@@ -112,10 +116,11 @@ tasks:
     desc: Run all CI Robot tests with headless browser on Docker, parallel where possible.
     env:
       HEADLESS: true
+      ENABLE_TOOLBAR: "false"
     cmds:
       - task: :up
+      - defer: {task: enable-toolbar}
       - task: clear-results
-      - task: disable-toolbar
       - task: :dc
         vars:
           SUB_CMD: >
@@ -128,10 +133,11 @@ tasks:
     desc: Run all API Robot tests in docker
     env:
       HEADLESS: true
+      ENABLE_TOOLBAR: "false"
     cmds:
       - task: :up
+      - defer: {task: enable-toolbar}
       - task: clear-results
-      - task: disable-toolbar
       - task: :dc
         vars:
           SUB_CMD: >
@@ -204,13 +210,10 @@ tasks:
       - cmd: mkdir -p results
       - cmd: rm -rf results/*
 
-  disable-toolbar:
-    desc: Disable the Symfony debug toolbar in Robot Framework tests
-    dir: ../../
-    status:
-      - test ! -f {{.BASE_PATH}}/.env.local
+  enable-toolbar:
+    desc: Re-enable the Symfony debug toolbar after Robot Framework tests
+    internal: true
+    env:
+      ENABLE_TOOLBAR: "true"
     cmds:
-      - cmd: sed -i '' 's/^\(ENABLE_TOOLBAR=\).*$/\1false/' .env.local
-        platforms: [darwin]
-      - cmd: sed -i 's/^\(ENABLE_TOOLBAR=\).*$/\1false/' .env.local
-        platforms: [linux]
+      - task: :up

@@ -38,6 +38,7 @@ services:
       - host.docker.internal:host-gateway
     environment:
       APP_ID: PUBLIC
+      ENABLE_TOOLBAR: ${ENABLE_TOOLBAR:-true}
 
   admin:
     image: ghcr.io/minvws/nl-rdo-woo-web-private/php:${PHP_IMAGE_TAG:-0.9.1}
@@ -63,6 +64,7 @@ services:
       APP_ID: ADMIN
       MC_CONFIG_DIR: /tmp/mc
       MC_HOST_local: http://root:password@minio:9000
+      ENABLE_TOOLBAR: ${ENABLE_TOOLBAR:-true}
 
   publication_api:
     image: ghcr.io/minvws/nl-rdo-woo-web-private/php:${PHP_IMAGE_TAG:-0.9.1}
